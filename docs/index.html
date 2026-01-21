@@ -12,27 +12,49 @@
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-            background-size: 400% 400%;
-            animation: gradient 15s ease infinite;
+            background: #0a0a0a;
             color: #e6edf3;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
         }
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        #webgl-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
         }
         .container {
             text-align: center;
             padding: 2rem;
+            position: relative;
+            z-index: 1;
         }
         h1 {
             font-size: 3rem;
             margin-bottom: 0.5rem;
+        }
+        .letter {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(-50px) rotate(20deg);
+        }
+        .letter.visible {
+            animation: letterIn 0.5s ease forwards;
+        }
+        @keyframes letterIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-50px) rotate(20deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg);
+            }
         }
         p {
             font-size: 1.25rem;
@@ -75,10 +97,12 @@
             }
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
+    <canvas id="webgl-canvas"></canvas>
     <div class="container">
-        <h1>Rafael Ramos</h1>
+        <h1 id="name">Rafael Ramos</h1>
         <p>Software Engineer</p>
         <div class="links">
             <a href="https://github.com/rramo012">GitHub</a>
@@ -103,6 +127,89 @@
             document.body.appendChild(star);
 
             setTimeout(() => star.remove(), 1000);
+        });
+
+        // Three.js particle system
+        const canvas = document.getElementById('webgl-canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        // Create particles
+        const particleCount = 2000;
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+
+        for (let i = 0; i < particleCount * 3; i += 3) {
+            positions[i] = (Math.random() - 0.5) * 20;
+            positions[i + 1] = (Math.random() - 0.5) * 20;
+            positions[i + 2] = (Math.random() - 0.5) * 20;
+
+            const color = new THREE.Color();
+            color.setHSL(Math.random() * 0.3 + 0.5, 0.8, 0.6);
+            colors[i] = color.r;
+            colors[i + 1] = color.g;
+            colors[i + 2] = color.b;
+        }
+
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+        const material = new THREE.PointsMaterial({
+            size: 0.05,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending
+        });
+
+        const particles = new THREE.Points(geometry, material);
+        scene.add(particles);
+        camera.position.z = 5;
+
+        let mouseX = 0, mouseY = 0;
+        document.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+            mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            particles.rotation.x += 0.001;
+            particles.rotation.y += 0.002;
+            particles.rotation.x += mouseY * 0.01;
+            particles.rotation.y += mouseX * 0.01;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Animate name letters
+        const nameEl = document.getElementById('name');
+        const name = nameEl.textContent;
+        nameEl.textContent = '';
+
+        const letters = name.split('').map(char => {
+            const span = document.createElement('span');
+            span.className = 'letter';
+            span.textContent = char === ' ' ? '\u00A0' : char;
+            nameEl.appendChild(span);
+            return span;
+        });
+
+        // Randomize order and animate over 6 seconds
+        const shuffled = [...letters].sort(() => Math.random() - 0.5);
+        shuffled.forEach((letter, i) => {
+            const delay = (i / shuffled.length) * 6000;
+            setTimeout(() => letter.classList.add('visible'), delay);
         });
     </script>
 </body>

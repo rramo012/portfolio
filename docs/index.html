@@ -12,13 +12,20 @@
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a0a0a;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
             color: #e6edf3;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
         #webgl-canvas {
             position: fixed;
@@ -129,52 +136,162 @@
             setTimeout(() => star.remove(), 1000);
         });
 
-        // Three.js particle system
+        // Three.js setup
         const canvas = document.getElementById('webgl-canvas');
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-        // Create particles
-        const particleCount = 2000;
-        const positions = new Float32Array(particleCount * 3);
-        const colors = new Float32Array(particleCount * 3);
-
-        for (let i = 0; i < particleCount * 3; i += 3) {
-            positions[i] = (Math.random() - 0.5) * 20;
-            positions[i + 1] = (Math.random() - 0.5) * 20;
-            positions[i + 2] = (Math.random() - 0.5) * 20;
-
-            const color = new THREE.Color();
-            color.setHSL(Math.random() * 0.3 + 0.5, 0.8, 0.6);
-            colors[i] = color.r;
-            colors[i + 1] = color.g;
-            colors[i + 2] = color.b;
-        }
-
-        const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-        const material = new THREE.PointsMaterial({
-            size: 0.05,
-            vertexColors: true,
-            transparent: true,
-            opacity: 0.8,
-            blending: THREE.AdditiveBlending
-        });
-
-        const particles = new THREE.Points(geometry, material);
-        scene.add(particles);
         camera.position.z = 5;
 
-        let mouseX = 0, mouseY = 0;
-        document.addEventListener('mousemove', (e) => {
-            mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
-            mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
-        });
+        // Create bear on bike
+        const bearBike = new THREE.Group();
+
+        // Bear material
+        const bearMat = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+        const darkBearMat = new THREE.MeshStandardMaterial({ color: 0x5D3A1A });
+        const blackMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+        const pinkMat = new THREE.MeshStandardMaterial({ color: 0xFFB6C1 });
+        const metalMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.8 });
+
+        // Bear body
+        const body = new THREE.Mesh(new THREE.SphereGeometry(0.35, 16, 16), bearMat);
+        body.position.set(0, 0.6, 0);
+        body.scale.set(1, 1.2, 0.9);
+        bearBike.add(body);
+
+        // Bear head
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.28, 16, 16), bearMat);
+        head.position.set(0, 1.1, 0.1);
+        bearBike.add(head);
+
+        // Ears
+        const earGeo = new THREE.SphereGeometry(0.1, 12, 12);
+        const leftEar = new THREE.Mesh(earGeo, bearMat);
+        leftEar.position.set(-0.2, 1.35, 0);
+        bearBike.add(leftEar);
+        const rightEar = new THREE.Mesh(earGeo, bearMat);
+        rightEar.position.set(0.2, 1.35, 0);
+        bearBike.add(rightEar);
+
+        // Inner ears
+        const innerEarGeo = new THREE.SphereGeometry(0.05, 8, 8);
+        const leftInnerEar = new THREE.Mesh(innerEarGeo, pinkMat);
+        leftInnerEar.position.set(-0.2, 1.35, 0.05);
+        bearBike.add(leftInnerEar);
+        const rightInnerEar = new THREE.Mesh(innerEarGeo, pinkMat);
+        rightInnerEar.position.set(0.2, 1.35, 0.05);
+        bearBike.add(rightInnerEar);
+
+        // Snout
+        const snout = new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 12), darkBearMat);
+        snout.position.set(0, 1.02, 0.25);
+        snout.scale.set(1, 0.8, 0.8);
+        bearBike.add(snout);
+
+        // Nose
+        const nose = new THREE.Mesh(new THREE.SphereGeometry(0.04, 8, 8), blackMat);
+        nose.position.set(0, 1.05, 0.35);
+        bearBike.add(nose);
+
+        // Eyes
+        const eyeGeo = new THREE.SphereGeometry(0.04, 8, 8);
+        const leftEye = new THREE.Mesh(eyeGeo, blackMat);
+        leftEye.position.set(-0.1, 1.15, 0.25);
+        bearBike.add(leftEye);
+        const rightEye = new THREE.Mesh(eyeGeo, blackMat);
+        rightEye.position.set(0.1, 1.15, 0.25);
+        bearBike.add(rightEye);
+
+        // Arms
+        const armGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.35, 8);
+        const leftArm = new THREE.Mesh(armGeo, bearMat);
+        leftArm.position.set(-0.35, 0.55, 0.2);
+        leftArm.rotation.z = 0.5;
+        leftArm.rotation.x = -0.8;
+        bearBike.add(leftArm);
+        const rightArm = new THREE.Mesh(armGeo, bearMat);
+        rightArm.position.set(0.35, 0.55, 0.2);
+        rightArm.rotation.z = -0.5;
+        rightArm.rotation.x = -0.8;
+        bearBike.add(rightArm);
+
+        // Legs
+        const legGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.3, 8);
+        const leftLeg = new THREE.Mesh(legGeo, bearMat);
+        leftLeg.position.set(-0.18, 0.15, 0.15);
+        leftLeg.rotation.x = -1.2;
+        bearBike.add(leftLeg);
+        const rightLeg = new THREE.Mesh(legGeo, bearMat);
+        rightLeg.position.set(0.18, 0.15, 0.15);
+        rightLeg.rotation.x = -1.2;
+        bearBike.add(rightLeg);
+
+        // Bike wheels
+        const wheelGeo = new THREE.TorusGeometry(0.25, 0.03, 8, 24);
+        const frontWheel = new THREE.Mesh(wheelGeo, metalMat);
+        frontWheel.position.set(0, -0.2, 0.6);
+        frontWheel.rotation.y = Math.PI / 2;
+        bearBike.add(frontWheel);
+        const backWheel = new THREE.Mesh(wheelGeo, metalMat);
+        backWheel.position.set(0, -0.2, -0.4);
+        backWheel.rotation.y = Math.PI / 2;
+        bearBike.add(backWheel);
+
+        // Wheel spokes
+        const spokeGeo = new THREE.CylinderGeometry(0.01, 0.01, 0.5, 6);
+        for (let i = 0; i < 6; i++) {
+            const spoke1 = new THREE.Mesh(spokeGeo, metalMat);
+            spoke1.position.copy(frontWheel.position);
+            spoke1.rotation.z = (i / 6) * Math.PI;
+            spoke1.rotation.y = Math.PI / 2;
+            bearBike.add(spoke1);
+            const spoke2 = new THREE.Mesh(spokeGeo, metalMat);
+            spoke2.position.copy(backWheel.position);
+            spoke2.rotation.z = (i / 6) * Math.PI;
+            spoke2.rotation.y = Math.PI / 2;
+            bearBike.add(spoke2);
+        }
+
+        // Bike frame
+        const frameGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.6, 8);
+        const frame1 = new THREE.Mesh(frameGeo, metalMat);
+        frame1.position.set(0, 0, 0.1);
+        frame1.rotation.x = Math.PI / 2;
+        bearBike.add(frame1);
+        const frame2 = new THREE.Mesh(frameGeo, metalMat);
+        frame2.position.set(0, 0.1, -0.1);
+        frame2.rotation.z = Math.PI / 4;
+        frame2.rotation.x = Math.PI / 2;
+        bearBike.add(frame2);
+
+        // Handlebars
+        const handleGeo = new THREE.CylinderGeometry(0.015, 0.015, 0.4, 8);
+        const handlebar = new THREE.Mesh(handleGeo, metalMat);
+        handlebar.position.set(0, 0.35, 0.5);
+        handlebar.rotation.z = Math.PI / 2;
+        bearBike.add(handlebar);
+
+        // Seat
+        const seat = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.05, 0.2), blackMat);
+        seat.position.set(0, 0.25, -0.2);
+        bearBike.add(seat);
+
+        // Rotate bear to face right (direction of travel)
+        bearBike.rotation.y = Math.PI / 2;
+
+        bearBike.scale.set(0.5, 0.5, 0.5);
+        bearBike.position.set(-6, -2.5, 0);
+        scene.add(bearBike);
+
+        // Add strong lighting
+        const dirLight = new THREE.DirectionalLight(0xffffff, 2);
+        dirLight.position.set(0, 5, 5);
+        scene.add(dirLight);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+        scene.add(ambientLight);
 
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
@@ -182,12 +299,55 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
+        let wheelRotation = 0;
+        let lastBearStarTime = 0;
+
+        function createBearStar() {
+            // Convert bear 3D position to screen coordinates
+            const vector = new THREE.Vector3();
+            vector.copy(bearBike.position);
+            vector.project(camera);
+
+            const x = (vector.x * 0.5 + 0.5) * window.innerWidth + (Math.random() - 0.5) * 60;
+            const y = (-(vector.y * 0.5) + 0.5) * window.innerHeight + (Math.random() - 0.5) * 60;
+
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.textContent = stars[Math.floor(Math.random() * stars.length)];
+            star.style.left = x + 'px';
+            star.style.top = y + 'px';
+            star.style.color = `hsl(${Math.random() * 360}, 100%, 75%)`;
+            star.style.fontSize = (15 + Math.random() * 15) + 'px';
+            document.body.appendChild(star);
+            setTimeout(() => star.remove(), 1000);
+        }
+
         function animate() {
             requestAnimationFrame(animate);
-            particles.rotation.x += 0.001;
-            particles.rotation.y += 0.002;
-            particles.rotation.x += mouseY * 0.01;
-            particles.rotation.y += mouseX * 0.01;
+
+            // Move bear across screen from left to right
+            bearBike.position.x += 0.03;
+            if (bearBike.position.x > 6) {
+                bearBike.position.x = -6;
+            }
+
+            // Rotate wheels
+            wheelRotation += 0.1;
+            frontWheel.rotation.z = wheelRotation;
+            backWheel.rotation.z = wheelRotation;
+
+            // Slight bobbing motion
+            bearBike.position.y = -2.5 + Math.sin(Date.now() * 0.008) * 0.05;
+
+            // Create stars behind bear
+            const now = Date.now();
+            if (now - lastBearStarTime > 20) {
+                lastBearStarTime = now;
+                for (let i = 0; i < 5; i++) {
+                    createBearStar();
+                }
+            }
+
             renderer.render(scene, camera);
         }
         animate();

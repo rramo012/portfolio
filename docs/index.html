@@ -56,6 +56,23 @@
         a:hover {
             border-color: #58a6ff;
         }
+        .star {
+            position: fixed;
+            pointer-events: none;
+            font-size: 20px;
+            animation: fall 1s ease-out forwards;
+            z-index: 9999;
+        }
+        @keyframes fall {
+            0% {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(50px) rotate(180deg) scale(0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -67,5 +84,25 @@
             <a href="https://www.linkedin.com/in/rafael-ramos-7b83281a5/">LinkedIn</a>
         </div>
     </div>
+    <script>
+        const stars = ['✦', '✧', '⭐', '✨', '⋆', '★'];
+        let lastTime = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            const now = Date.now();
+            if (now - lastTime < 50) return;
+            lastTime = now;
+
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.textContent = stars[Math.floor(Math.random() * stars.length)];
+            star.style.left = e.clientX + 'px';
+            star.style.top = e.clientY + 'px';
+            star.style.color = `hsl(${Math.random() * 360}, 100%, 75%)`;
+            document.body.appendChild(star);
+
+            setTimeout(() => star.remove(), 1000);
+        });
+    </script>
 </body>
 </html>

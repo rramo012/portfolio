@@ -1,4 +1,6 @@
 import RevealOnScroll from './RevealOnScroll'
+import AnimatedCounter from './AnimatedCounter'
+import TerminalIntro from './TerminalIntro'
 
 export default function About() {
   return (
@@ -9,6 +11,10 @@ export default function About() {
           Who I <span>Am</span>
         </h2>
         <hr className="section__rule" />
+      </RevealOnScroll>
+
+      <RevealOnScroll delay={1}>
+        <TerminalIntro />
       </RevealOnScroll>
 
       <div className="about__grid">
@@ -41,15 +47,15 @@ export default function About() {
 
       <div className="about__stats">
         <RevealOnScroll className="stat" delay={1}>
-          <span className="stat__number">13+</span>
+          <AnimatedCounter value={13} suffix="+" />
           <span className="stat__label">Years experience</span>
         </RevealOnScroll>
         <RevealOnScroll className="stat" delay={2}>
-          <span className="stat__number">20+</span>
+          <AnimatedCounter value={20} suffix="+" />
           <span className="stat__label">Products & apps shipped</span>
         </RevealOnScroll>
         <RevealOnScroll className="stat" delay={3}>
-          <span className="stat__number">99.9%</span>
+          <AnimatedCounter value={99} suffix=".9%" />
           <span className="stat__label">Uptime maintained</span>
         </RevealOnScroll>
       </div>

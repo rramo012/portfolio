@@ -11,9 +11,11 @@ interface Node {
   highlighted: boolean
 }
 
-const TOTAL_NODES = 70
-const HIGHLIGHTED_COUNT = 5
+const TOTAL_NODES = 350
+const HIGHLIGHTED_COUNT = 25
 const CONNECTION_DIST = 100
+const MOUSE_RADIUS = 150
+const MOUSE_FORCE = 0.8
 
 export default function NodeNetwork() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -28,6 +30,7 @@ export default function NodeNetwork() {
     let nodes: Node[] = []
     let animId: number
     const dpr = window.devicePixelRatio || 1
+    let mouse = { x: -1000, y: -1000 }
 
     function resizeCanvas() {
       canvas!.width = window.innerWidth * dpr
@@ -60,6 +63,28 @@ export default function NodeNetwork() {
 
       for (let i = 0; i < nodes.length; i++) {
         const n = nodes[i]
+
+        // Mouse repulsion
+        const mdx = n.x - mouse.x
+        const mdy = n.y - mouse.y
+        const mDist = Math.sqrt(mdx * mdx + mdy * mdy)
+        if (mDist < MOUSE_RADIUS && mDist > 0) {
+          const force = (1 - mDist / MOUSE_RADIUS) * MOUSE_FORCE
+          n.vx += (mdx / mDist) * force
+          n.vy += (mdy / mDist) * force
+        }
+
+        // Dampen velocity back to base speed
+        n.vx *= 0.98
+        n.vy *= 0.98
+
+        // Ensure minimum drift
+        const speed = Math.sqrt(n.vx * n.vx + n.vy * n.vy)
+        if (speed < 0.15) {
+          n.vx += (Math.random() - 0.5) * 0.05
+          n.vy += (Math.random() - 0.5) * 0.05
+        }
+
         n.x += n.vx
         n.y += n.vy
 
@@ -69,6 +94,7 @@ export default function NodeNetwork() {
         if (n.y > h + 10) n.y = -10
       }
 
+      // Draw connections
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
           const dx = nodes[i].x - nodes[j].x
@@ -80,8 +106,8 @@ export default function NodeNetwork() {
             const anyHighlighted = nodes[i].highlighted || nodes[j].highlighted
 
             ctx!.strokeStyle = anyHighlighted
-              ? `rgba(42, 21, 21, ${opacity * 0.8})`
-              : `rgba(26, 26, 26, ${opacity * 0.8})`
+              ? `rgba(255, 45, 45, ${opacity * 0.15})`
+              : `rgba(100, 100, 100, ${opacity * 0.25})`
             ctx!.lineWidth = 1
             ctx!.beginPath()
             ctx!.moveTo(nodes[i].x, nodes[i].y)
@@ -91,14 +117,32 @@ export default function NodeNetwork() {
         }
       }
 
+      // Draw mouse connections to nearby nodes
+      for (let i = 0; i < nodes.length; i++) {
+        const dx = nodes[i].x - mouse.x
+        const dy = nodes[i].y - mouse.y
+        const dist = Math.sqrt(dx * dx + dy * dy)
+
+        if (dist < MOUSE_RADIUS) {
+          const opacity = (1 - dist / MOUSE_RADIUS) * 0.6
+          ctx!.strokeStyle = `rgba(255, 45, 45, ${opacity})`
+          ctx!.lineWidth = 1
+          ctx!.beginPath()
+          ctx!.moveTo(mouse.x, mouse.y)
+          ctx!.lineTo(nodes[i].x, nodes[i].y)
+          ctx!.stroke()
+        }
+      }
+
+      // Draw nodes
       for (let i = 0; i < nodes.length; i++) {
         const n = nodes[i]
         if (n.highlighted) {
           ctx!.fillStyle = '#ff2d2d'
-          ctx!.globalAlpha = 0.6
+          ctx!.globalAlpha = 0.8
         } else {
-          ctx!.fillStyle = '#222222'
-          ctx!.globalAlpha = 1
+          ctx!.fillStyle = '#555555'
+          ctx!.globalAlpha = 0.6
         }
         ctx!.beginPath()
         ctx!.arc(n.x, n.y, n.radius, 0, Math.PI * 2)
@@ -113,17 +157,52 @@ export default function NodeNetwork() {
     initNodes()
     draw()
 
+    const handleMouseMove = (e: MouseEvent) => {
+      mouse.x = e.clientX
+      mouse.y = e.clientY
+    }
+
+    const handleMouseLeave = () => {
+      mouse.x = -1000
+      mouse.y = -1000
+    }
+
     let resizeTimeout: ReturnType<typeof setTimeout>
     const handleResize = () => {
       clearTimeout(resizeTimeout)
       resizeTimeout = setTimeout(resizeCanvas, 150)
     }
 
+    // Listen for spawn events from the wireframe watcher
+    const handleSpawn = (e: Event) => {
+      const { x, y } = (e as CustomEvent).detail
+      const count = 8 + Math.floor(Math.random() * 8)
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5
+        const speed = 1.5 + Math.random() * 3
+        const highlighted = Math.random() < 0.3
+        nodes.push({
+          x,
+          y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          radius: highlighted ? 2 : 1 + Math.random(),
+          highlighted,
+        })
+      }
+    }
+
+    window.addEventListener('mousemove', handleMouseMove, { passive: true })
+    document.addEventListener('mouseleave', handleMouseLeave)
     window.addEventListener('resize', handleResize)
+    window.addEventListener('watcher-spawn', handleSpawn)
 
     return () => {
       cancelAnimationFrame(animId)
+      window.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseleave', handleMouseLeave)
       window.removeEventListener('resize', handleResize)
+      window.removeEventListener('watcher-spawn', handleSpawn)
       clearTimeout(resizeTimeout)
     }
   }, [])

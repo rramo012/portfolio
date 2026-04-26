@@ -13,9 +13,25 @@ const links = [
 export default function Nav() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [activeSection, setActiveSection] = useState('')
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 60)
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 60)
+
+      // Determine active section
+      const sections = links.map((l) => l.href.slice(1))
+      let current = ''
+      for (const id of sections) {
+        const el = document.getElementById(id)
+        if (el) {
+          const top = el.getBoundingClientRect().top
+          if (top <= 120) current = id
+        }
+      }
+      setActiveSection(current)
+    }
+
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
@@ -48,7 +64,11 @@ export default function Nav() {
         <ul className="nav__links">
           {links.map(({ href, label }) => (
             <li key={href}>
-              <a href={href} className="nav__link" onClick={(e) => scrollTo(e, href)}>
+              <a
+                href={href}
+                className={`nav__link${activeSection === href.slice(1) ? ' nav__link--active' : ''}`}
+                onClick={(e) => scrollTo(e, href)}
+              >
                 {label}
               </a>
             </li>
@@ -70,7 +90,7 @@ export default function Nav() {
           <a
             key={href}
             href={href}
-            className="mobile-menu__link"
+            className={`mobile-menu__link${activeSection === href.slice(1) ? ' mobile-menu__link--active' : ''}`}
             onClick={(e) => scrollTo(e, href)}
           >
             {label}

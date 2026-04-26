@@ -7,6 +7,7 @@ const projects = [
     desc: 'Customer-facing portal for OpenMetal\'s cloud infrastructure platform. Features IAM with RBAC, OAuth, and SAML integration, automated cloud deployments, and real-time infrastructure management across Kubernetes-based environments.',
     tags: ['MEAN Stack', 'Kubernetes', 'OpenStack', 'IAM/RBAC'],
     href: 'https://central.openmetal.io/',
+    icon: 'OM',
   },
   {
     number: '002',
@@ -14,6 +15,7 @@ const projects = [
     desc: 'An open-source page builder for WordPress that enables drag-and-drop content editing within the native TinyMCE editor. Built from the ground up as a founding product of the BoldGrid suite.',
     tags: ['JavaScript', 'WordPress', 'TinyMCE', 'Open Source'],
     href: 'https://github.com/BoldGrid/post-and-page-builder',
+    icon: 'BG',
   },
   {
     number: '003',
@@ -21,6 +23,7 @@ const projects = [
     desc: 'A configuration-driven library for building WordPress themes. Enables rapid theme development through a declarative API, powering dozens of themes across the BoldGrid ecosystem.',
     tags: ['PHP', 'WordPress', 'SCSS', 'Theme Engine'],
     href: 'https://github.com/BoldGrid/boldgrid-theme-framework',
+    icon: 'TF',
   },
   {
     number: '004',
@@ -28,6 +31,7 @@ const projects = [
     desc: 'An Angular application individually built to handle customer purchases, account management, and on-demand WordPress environment deployments. Powered the commercial side of the BoldGrid product line.',
     tags: ['Angular', 'REST API', 'Payment Processing', 'WordPress'],
     href: 'https://www.boldgrid.com/central/',
+    icon: 'BC',
   },
 ]
 
@@ -46,6 +50,9 @@ export default function Projects() {
         {projects.map((project, i) => (
           <RevealOnScroll key={project.number} className="project-card" delay={i + 1}>
             <a href={project.href} target="_blank" rel="noopener noreferrer" className="project-card__link">
+              <div className="project-card__visual">
+                <span className="project-card__icon">{project.icon}</span>
+              </div>
               <span className="project-card__number">{project.number}</span>
               <span className="project-card__arrow">&#8599;</span>
               <h3 className="project-card__name">{project.name}</h3>

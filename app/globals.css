@@ -87,6 +87,19 @@ body::before {
 }
 
 /* ========================================
+   SCROLL PROGRESS BAR
+   ======================================== */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: var(--accent);
+  z-index: 10000;
+  transition: width 0.1s linear;
+}
+
+/* ========================================
    NODE NETWORK CANVAS
    ======================================== */
 .node-network {
@@ -162,11 +175,13 @@ body::before {
   transition: width 0.25s ease;
 }
 
-.nav__link:hover {
+.nav__link:hover,
+.nav__link--active {
   color: var(--accent);
 }
 
-.nav__link:hover::after {
+.nav__link:hover::after,
+.nav__link--active::after {
   width: 100%;
 }
 
@@ -334,6 +349,8 @@ body::before {
   height: 400px;
   z-index: 0;
   opacity: 0.5;
+  cursor: crosshair;
+  pointer-events: auto;
 }
 
 .hero__wireframe svg {
@@ -421,6 +438,39 @@ body::before {
 @keyframes nodePulse {
   0%, 100% { opacity: 0.6; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.5); }
+}
+
+/* Cyber watcher */
+.watcher-ring {
+  opacity: 0;
+  animation: nodeAppear 0.6s ease forwards;
+  animation-delay: 3.5s;
+}
+
+.watcher-iris {
+  opacity: 0;
+  animation: nodeAppear 0.6s ease forwards;
+  animation-delay: 3.8s;
+}
+
+.watcher-pulse {
+  animation: watcherPulse 3s ease-in-out 4.5s infinite;
+}
+
+.watcher-label {
+  opacity: 0;
+  animation: nodeAppear 0.4s ease forwards;
+  animation-delay: 4.2s;
+}
+
+.watcher-label--active {
+  animation-delay: 4.5s;
+}
+
+@keyframes watcherPulse {
+  0% { opacity: 0; r: 55; }
+  30% { opacity: 0.3; }
+  100% { opacity: 0; r: 90; }
 }
 
 .hero__scroll {
@@ -1008,8 +1058,127 @@ body::before {
   transition: color 0.3s ease;
 }
 
-.mobile-menu__link:hover {
+.mobile-menu__link:hover,
+.mobile-menu__link--active {
   color: var(--accent);
+}
+
+/* ========================================
+   TERMINAL
+   ======================================== */
+.terminal {
+  border: 1px solid var(--border);
+  margin-bottom: 4rem;
+  overflow: hidden;
+}
+
+.terminal__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1rem;
+  background: rgba(20, 20, 20, 0.9);
+  border-bottom: 1px solid var(--border);
+}
+
+.terminal__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.terminal__dot--red { background: #ff5f56; }
+.terminal__dot--yellow { background: #ffbd2e; }
+.terminal__dot--green { background: #27c93f; }
+
+.terminal__title {
+  font-family: var(--font-heading);
+  font-size: 0.65rem;
+  color: var(--fg-muted);
+  margin-left: 0.5rem;
+  letter-spacing: 0.05em;
+}
+
+.terminal__body {
+  padding: 1.5rem;
+  background: rgba(10, 10, 10, 0.9);
+}
+
+.terminal__line {
+  margin-bottom: 0.8rem;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.terminal__line:last-child {
+  margin-bottom: 0;
+}
+
+.terminal__line--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.terminal__prompt {
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.terminal__response {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--fg-dim);
+  display: block;
+  padding-left: 1rem;
+}
+
+/* ========================================
+   PROJECT CARD VISUAL
+   ======================================== */
+.project-card__visual {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: -2.5rem -2.5rem 2rem;
+  padding: 2.5rem;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(255, 45, 45, 0.03) 0%, rgba(10, 10, 10, 0.5) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.project-card__visual::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 20px,
+    rgba(51, 51, 51, 0.15) 20px,
+    rgba(51, 51, 51, 0.15) 21px
+  );
+}
+
+.project-card__icon {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.8rem;
+  color: var(--accent);
+  opacity: 0.3;
+  letter-spacing: 0.1em;
+  position: relative;
+  z-index: 1;
+  transition: opacity 0.3s ease;
+}
+
+.project-card:hover .project-card__icon {
+  opacity: 0.6;
 }
 
 /* ========================================

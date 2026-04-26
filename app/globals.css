@@ -625,6 +625,33 @@ body::before {
   margin-bottom: 0;
 }
 
+.about__profile {
+  margin-top: 4rem;
+  padding: 2.5rem 3rem;
+  background: rgba(255, 45, 45, 0.04);
+  border-left: 4px solid var(--accent);
+  border-radius: 0 4px 4px 0;
+}
+
+.about__profile-label {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.25rem;
+}
+
+.about__profile-quote {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: clamp(1rem, 1.4vw, 1.25rem);
+  line-height: 1.65;
+  color: var(--fg);
+}
+
 .about__stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

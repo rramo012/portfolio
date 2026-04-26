@@ -1,0 +1,7 @@
+.next/
+node_modules/
+out/
+.playwright-mcp/
+*.tsbuildinfo
+next-env.d.ts
+drafts/
